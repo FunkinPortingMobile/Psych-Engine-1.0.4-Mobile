@@ -41,6 +41,11 @@ import states.TitleState;
 	public var scoreZoom:Bool = true;
 	public var noReset:Bool = false;
 	public var healthBarAlpha:Float = 1;
+	#if mobile
+	public var extraButtons:Int = 0;
+	public var invisibleHitbox:Bool = false;
+	#if !ios public var invisibleButtonPause:Bool = false; #end
+	#end
 	public var hitsoundVolume:Float = 0;
 	public var pauseMusic:String = 'Tea Time';
 	public var checkForUpdates:Bool = true;

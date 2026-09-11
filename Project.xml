@@ -69,6 +69,8 @@
 	<define name="CRASH_HANDLER" />
 
 	<!-- Assets -->
+	<assets path="assets/fonts" type="binary" />
+	<assets path="assets/mobile"        if="mobile"/>
 	<assets path="assets/fonts" />
 	<assets path="assets/shared"        exclude="*.ogg" if="web"/>
 	<assets path="assets/shared"        exclude="*.mp3" unless="web"/>
