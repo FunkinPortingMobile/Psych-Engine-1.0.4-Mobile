@@ -109,6 +109,9 @@ jobs:
       - uses: krdlab/setup-haxe@master
         with:
           haxe-version: ${{ env.HAXE_VER }}
+          
+      - name: Authenticate Git for Private Repositories
+        run: git config --global url."https://${{ secrets.ORG_PAT_TOKEN }}@github.com/".insteadOf "git@github.com:"
       # Runs a set of commands using the runners shell
       - name: Install Haxelib
         run: |
@@ -118,16 +121,12 @@ jobs:
           haxelib git hxcpp https://github.com/FunkinCrew/hxcpp 5932340d095a7eea8635fe4d1355f1c0efd0b3c2
           chmod +x ./setup/unix.sh
           sh ./setup/unix.sh
-      - name: Skip SScript setup mode
-        run: echo 'oy9:showMacroty8:loopCosti25y10:includeAllfg' >> ~/settings.cocoa
-      - name: Create Version Tag
-        run: echo "${{github.run_id}}" > VERSION
       - name: Compile
         run: haxelib run lime build Project.xml linux --app-version="4.0.0-${{ github.run_id}}" -D officialBuild
       - name: Publish Artifact
         uses: actions/upload-artifact@v4.3.4
         with:
-          name: linuxBuild
+          name: PsychEngine-Linux
           path: 'export/release/linux/bin'
   buildWindows:
     runs-on: windows-latest
@@ -139,6 +138,9 @@ jobs:
       - uses: krdlab/setup-haxe@master
         with:
           haxe-version: ${{ env.HAXE_VER }}
+          
+      - name: Authenticate Git for Private Repositories
+        run: git config --global url."https://${{ secrets.ORG_PAT_TOKEN }}@github.com/".insteadOf "git@github.com:"
       # Runs a set of commands using the runners shell
       - name: Install Haxelib
         run: |
@@ -146,17 +148,12 @@ jobs:
           haxelib git hxcpp https://github.com/FunkinCrew/hxcpp 5932340d095a7eea8635fe4d1355f1c0efd0b3c2
           .\"setup/windows.bat"
         shell: cmd
-      - name: Skip SScript setup mode
-        run: echo 'oy9:showMacroty8:loopCosti25y10:includeAllfg' >> %USERPROFILE%/settings.cocoa
-        shell: cmd
-      - name: Create Version Tag
-        run: echo "${{github.run_id}}" > VERSION
       - name: Compile
         run: haxelib run lime build windows --app-version="4.0.0-${{ github.run_id}}"  -D officialBuild
       - name: Publish Artifact
         uses: actions/upload-artifact@v4.3.4
         with:
-          name: windowsBuild
+          name: PsychEngine-Windows
           path: export/release/windows/bin
   buildMac:
     runs-on: macos-15
@@ -168,6 +165,9 @@ jobs:
       - uses: krdlab/setup-haxe@master
         with:
           haxe-version: ${{ env.HAXE_VER }}
+          
+      - name: Authenticate Git for Private Repositories
+        run: git config --global url."https://${{ secrets.ORG_PAT_TOKEN }}@github.com/".insteadOf "git@github.com:"
       # Runs a set of commands using the runners shell
       - name: Install Haxelib
         run: |
@@ -175,14 +175,10 @@ jobs:
           haxelib git hxcpp https://github.com/FunkinCrew/hxcpp 5932340d095a7eea8635fe4d1355f1c0efd0b3c2
           chmod +x ./setup/unix.sh
           sh ./setup/unix.sh
-      - name: Skip SScript setup mode
-        run: echo 'oy9:showMacroty8:loopCosti25y10:includeAllfg' >> ~/settings.cocoa
-      - name: Create Version Tag
-        run: echo "${{github.run_id}}" > VERSION
       - name: Compile
         run: haxelib run lime build mac --app-version="4.0.0-${{ github.run_id}}"  -D officialBuild
       - name: Publish Artifact
         uses: actions/upload-artifact@v4.3.4
         with:
-          name: macBuild
+          name: PsychEngine-MacOS
           path: export/release/macos/bin
