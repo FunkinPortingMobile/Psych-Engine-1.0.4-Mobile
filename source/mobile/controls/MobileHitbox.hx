@@ -23,8 +23,7 @@ import mobile.backend.flixel.input.TouchInputID;
 class MobileHitbox extends TouchInputManager
 {
 	public var buttons:Array<TouchButton> = [];
-	
-	var extraButtons:Int;
+	public var extraButtons(default, set):Int = 0;
 	
 	public var buttonLeft:TouchButton;
 	public var buttonDown:TouchButton;
@@ -41,8 +40,29 @@ class MobileHitbox extends TouchInputManager
 	public function new():Void
 	{
 		super();
+		scrollFactor.set();
+	}
 
-		extraButtons = ClientPrefs.data.extraButtons;
+	private function set_extraButtons(value:Int):Int
+	{
+		if (value != extraButtons)
+		{
+			extraButtons = value;
+			createHitbox();
+		}
+		return extraButtons;
+	}
+
+	public function createHitbox():Void
+	{
+		for (btn in buttons)
+		{
+			remove(btn);
+			FlxDestroyUtil.destroy(btn);
+		}
+		buttons = [];
+		buttonAction = null;
+		buttonActionTwo = null;
 
 		var hasExtraButtons:Bool = extraButtons > 0;
 		var hitboxY:Int = hasExtraButtons ? Std.int(FlxG.height * 0.25) : 0;
@@ -89,7 +109,6 @@ class MobileHitbox extends TouchInputManager
 			}
 		}
 
-		scrollFactor.set();
 		refreshMappedButtons();
 	}
 
