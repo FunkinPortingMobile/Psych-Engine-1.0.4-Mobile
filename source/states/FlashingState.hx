@@ -32,6 +32,10 @@ class FlashingState extends MusicBeatState
 		warnText.screenCenter(Y);
 		texts.add(warnText);
 
+		#if mobile
+		addVirtualPad('NONE', 'A_B');
+		#end
+
 		final keys = ["Yes", "No"];
 		for (i in 0...keys.length) {
 			final button = new FlxText(0, 0, FlxG.width, keys[i]);

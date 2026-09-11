@@ -158,7 +158,7 @@ class DialogueBox extends FlxSpriteGroup
 				FlxG.sound.play(Paths.sound('clickText'), 0.8);
 			}
 		}
-		else if(Controls.instance.ACCEPT)
+		else if(Controls.instance.ACCEPT #if mobile || TouchUtil.justPressed #end)
 		{
 			if (dialogueEnded)
 			{

@@ -71,6 +71,12 @@ class ResetScoreSubState extends MusicBeatSubstate
 		add(noText);
 		
 		for(letter in yesText.letters) letter.color = FlxColor.RED;
+
+		#if mobile
+		addVirtualPad('LEFT_RIGHT', 'A_B');
+		addVirtualPadCamera();
+		#end
+
 		updateOptions();
 	}
 

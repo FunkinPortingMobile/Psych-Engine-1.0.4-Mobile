@@ -74,7 +74,7 @@ class CutsceneHandler extends FlxBasic
 		
 		if(_canSkip && cutsceneTime > 0.1)
 		{
-			if(Controls.instance.pressed('accept'))
+			if(isSkipHeld())
 				holdingTime = Math.max(0, Math.min(_timeToSkip, holdingTime + elapsed));
 			else if (holdingTime > 0)
 				holdingTime = Math.max(0, FlxMath.lerp(holdingTime, -0.1, FlxMath.bound(elapsed * 3, 0, 1)));
@@ -103,6 +103,20 @@ class CutsceneHandler extends FlxBasic
 			destroy();
 			PlayState.instance.remove(this);
 		}
+	}
+
+	private function isSkipHeld():Bool
+	{
+		if(Controls.instance.pressed('accept')) return true;
+
+		#if mobile
+		for(touch in FlxG.touches.list)
+		{
+			if(touch.pressed || touch.justPressed) return true;
+		}
+		#end
+
+		return false;
 	}
 
 	function updateSkipAlpha()

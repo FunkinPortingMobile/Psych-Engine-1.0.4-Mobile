@@ -120,6 +120,10 @@ class AchievementsMenuState extends MusicBeatState
 		add(descText);
 		add(nameText);
 		
+		#if mobile
+		addVirtualPad('LEFT_FULL', 'B');
+		#end
+
 		_changeSelection();
 		super.create();
 		

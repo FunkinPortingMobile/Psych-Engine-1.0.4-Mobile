@@ -293,6 +293,11 @@ class ModsMenuState extends MusicBeatState
 		add(modsGroup);
 		_lastControllerMode = controls.controllerMode;
 
+		#if mobile
+		addVirtualPad('UP_DOWN', 'B');
+		virtualPad.y -= 215;
+		#end
+
 		changeSelectedMod();
 		super.create();
 	}
@@ -307,7 +312,7 @@ class ModsMenuState extends MusicBeatState
 
 	override function update(elapsed:Float)
 	{
-		if(controls.BACK && hoveringOnMods)
+		if(controls.BACK #if android || FlxG.android.justReleased.BACK #end && hoveringOnMods)
 		{
 			saveTxt();
 
