@@ -222,7 +222,7 @@ class Main extends Sprite
 		dateNow = dateNow.replace(" ", "_");
 		dateNow = dateNow.replace(":", "'");
 
-		path = "crash/" + "PsychEngine_0.7.3_" + dateNow + ".txt";
+		path = "crash/" + "PsychEngine_1.0.4_" + dateNow + ".txt";
 
 		for (stackItem in callStack)
 		{
