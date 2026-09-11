@@ -202,7 +202,7 @@ class Paths
 		var file:String = modsVideo(key);
 		if(FileSystem.exists(file)) return file;
 		#end
-		return #if mobile StorageSystem.getDirectory() + #end 'assets/videos/$key.$VIDEO_EXT';
+		return 'assets/videos/$key.$VIDEO_EXT';
 	}
 
 	inline static public function sound(key:String, ?modsAllowed:Bool = true):Sound
