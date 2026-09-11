@@ -202,7 +202,7 @@ class Paths
 		var file:String = modsVideo(key);
 		if(FileSystem.exists(file)) return file;
 		#end
-		return 'assets/videos/$key.$VIDEO_EXT';
+		return #if mobile StorageSystem.getDirectory() + #end 'assets/videos/$key.$VIDEO_EXT';
 	}
 
 	inline static public function sound(key:String, ?modsAllowed:Bool = true):Sound
@@ -448,7 +448,7 @@ class Paths
 
 	#if MODS_ALLOWED
 	inline static public function mods(key:String = '')
-		return 'mods/' + key;
+		return #if mobile StorageSystem.getDirectory() + #end 'mods/' + key;
 
 	inline static public function modsJson(key:String)
 		return modFolders('data/' + key + '.json');
@@ -486,7 +486,7 @@ class Paths
 			if(FileSystem.exists(fileToCheck))
 				return fileToCheck;
 		}
-		return 'mods/' + key;
+		return #if mobile StorageSystem.getDirectory() + #end 'mods/' + key;
 	}
 	#end
 

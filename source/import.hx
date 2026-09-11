@@ -21,6 +21,13 @@ import sys.io.*;
 import js.html.*;
 #end
 
+#if mobile
+import mobile.backend.StorageSystem;
+import mobile.backend.utils.TouchUtil;
+import mobile.backend.utils.PopUp;
+import mobile.backend.MobileUtil;
+#end
+
 import backend.Paths;
 import backend.Controls;
 import backend.CoolUtil;

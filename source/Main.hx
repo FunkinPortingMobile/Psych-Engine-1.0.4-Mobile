@@ -1,9 +1,5 @@
 package;
 
-#if android
-import android.content.Context;
-#end
-
 import debug.FPSCounter;
 
 import flixel.graphics.FlxGraphic;
@@ -46,7 +42,6 @@ import backend.Highscore;
 @:cppFileCode('#define GAMEMODE_AUTO')
 #end
 
-// // // // // // // // //
 class Main extends Sprite
 {
 	public static final game = {
@@ -75,20 +70,23 @@ class Main extends Sprite
 		backend.Native.fixScaling();
 		#end
 
-		// Credits to MAJigsaw77 (he's the og author for this code)
-		#if android
-		Sys.setCwd(Path.addTrailingSlash(Context.getExternalFilesDir()));
-		#elseif ios
-		Sys.setCwd(lime.system.System.applicationStorageDirectory);
+		#if mobile
+		StorageSystem.getPermissions();
+		Sys.setCwd(StorageSystem.getAssetsDirectory());
+		FlxG.signals.preUpdate.add(function() 
+		{
+			MobileUtil.updateInputMethod();
+		});
 		#end
+ 
 		#if VIDEOS_ALLOWED
 		hxvlc.util.Handle.init(#if (hxvlc >= "1.8.0")  ['--no-lua'] #end);
 		#end
 
 		#if LUA_ALLOWED
 		Mods.pushGlobalMods();
-		#end
 		Mods.loadTopMod();
+		#end
 
 		FlxG.save.bind('funkin', CoolUtil.getSavePath());
 		Highscore.load();
@@ -156,7 +154,6 @@ class Main extends Sprite
 		#if ACHIEVEMENTS_ALLOWED Achievements.load(); #end
 		addChild(new FlxGame(game.width, game.height, game.initialState, game.framerate, game.framerate, game.skipSplash, game.startFullscreen));
 
-		#if !mobile
 		fpsVar = new FPSCounter(10, 3, 0xFFFFFF);
 		addChild(fpsVar);
 		Lib.current.stage.align = "tl";
@@ -164,7 +161,6 @@ class Main extends Sprite
 		if(fpsVar != null) {
 			fpsVar.visible = ClientPrefs.data.showFPS;
 		}
-		#end
 
 		#if (linux || mac) // fix the app icon not showing up on the Linux Panel / Mac Dock
 		var icon = Image.fromFile("icon.png");
@@ -179,6 +175,10 @@ class Main extends Sprite
 		FlxG.fixedTimestep = false;
 		FlxG.game.focusLostFramerate = 60;
 		FlxG.keys.preventDefaultKeys = [TAB];
+
+		#if android
+		FlxG.android.preventDefaultKeys = [BACK];
+		#end
 		
 		#if CRASH_HANDLER
 		Lib.current.loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, onCrash);
@@ -222,7 +222,7 @@ class Main extends Sprite
 		dateNow = dateNow.replace(" ", "_");
 		dateNow = dateNow.replace(":", "'");
 
-		path = "./crash/" + "PsychEngine_" + dateNow + ".txt";
+		path = "crash/" + "PsychEngine_0.7.3_" + dateNow + ".txt";
 
 		for (stackItem in callStack)
 		{
@@ -235,23 +235,24 @@ class Main extends Sprite
 			}
 		}
 
-		errMsg += "\nUncaught Error: " + e.error;
-		// remove if you're modding and want the crash log message to contain the link
-		// please remember to actually modify the link for the github page to report the issues to.
-		#if officialBuild
-		errMsg += "\nPlease report this error to the GitHub page: https://github.com/ShadowMario/FNF-PsychEngine";
-		#end
-		errMsg += "\n\n> Crash Handler written by: sqirra-rng";
+		errMsg += "\nUncaught Error: "
+			+ e.error
+			+
+			"\nPlease report this error to the GitHub page: https://github.com/DeveloperPorting/Psych-Engine-1.0.4-Mobile\n\n> Crash Handler written by: sqirra-rng";
 
-		if (!FileSystem.exists("./crash/"))
-			FileSystem.createDirectory("./crash/");
+		if (!FileSystem.exists(#if mobile StorageSystem.getDirectory() + #end "crash"))
+			FileSystem.createDirectory(#if mobile StorageSystem.getDirectory() + #end "crash");
 
-		File.saveContent(path, errMsg + "\n");
+		File.saveContent(#if mobile StorageSystem.getDirectory() + #end path, errMsg + "\n");
 
 		Sys.println(errMsg);
 		Sys.println("Crash dump saved in " + Path.normalize(path));
 
+		#if mobile
+		PopUp.showAlert("Error!", errMsg, "Close");
+		#else
 		Application.current.window.alert(errMsg, "Error!");
+		#end
 		#if DISCORD_ALLOWED
 		DiscordClient.shutdown();
 		#end
