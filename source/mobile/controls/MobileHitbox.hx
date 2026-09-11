@@ -40,6 +40,7 @@ class MobileHitbox extends TouchInputManager
 	public function new():Void
 	{
 		super();
+		createHitbox();
 		scrollFactor.set();
 	}
 
