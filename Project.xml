@@ -216,7 +216,9 @@
 		<config:ios category_type="public.app-category.music-games" />
 		<config:mac category_type="public.app-category.music-games" />
 	</section>
-	
+
+   <java path="source" if="android" />
+
 	<!-- _________________________________ Custom _______________________________ -->
 
 	<assets path='art/icons/iconOG.png' rename='icon.png' if="linux || mac" />
