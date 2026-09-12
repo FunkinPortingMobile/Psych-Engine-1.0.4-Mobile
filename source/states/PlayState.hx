@@ -569,6 +569,29 @@ class PlayState extends MusicBeatState
 
 		startingSong = true;
 
+		#if mobile
+		var canCreatePause:Bool = true;
+	
+		#if !ios
+		canCreatePause = !ClientPrefs.data.invisibleButtonPause;
+		#end
+	
+		if (canCreatePause)
+		{
+			var pauseButton = new mobile.backend.PauseButton(0, 0, function()
+			{
+				var ret:Dynamic = callOnScripts('onPause', null, true);
+				if(ret != LuaUtils.Function_Stop) {
+					openPauseMenu();
+				}
+			});
+			add(pauseButton);
+		}
+		
+		addMobileControls(false);
+		hitbox.visible = true;
+		#end
+
 		#if LUA_ALLOWED
 		for (notetype in noteTypes)
 			startLuasNamed('custom_notetypes/' + notetype + '.lua');
@@ -955,6 +978,10 @@ class PlayState extends MusicBeatState
 
 	public function startCountdown()
 	{
+		#if mobile
+		hitbox.visible = true;
+		#end
+
 		if(startedCountdown) {
 			callOnScripts('onStartCountdown');
 			return false;
@@ -2414,6 +2441,10 @@ class PlayState extends MusicBeatState
 				return false;
 			}
 		}
+
+		#if mobile
+		hitbox.visible = false;
+		#end
 
 		timeBar.visible = false;
 		timeTxt.visible = false;
