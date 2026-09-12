@@ -41,8 +41,8 @@ class CreditsState extends MusicBeatState
 			["Funkin' Porting Mobile Team"],
 			['StarNova',		'starnova',		'Lead Programmer for Port Mobile',		'https://youtube.com/@starnovaoficial', 		'AA4060'],
 			['FNF BR',				'fnfbr',			'Lead Programmer for Port Mobile',						 'https://youtube.com/@fnf-br',		'A2DCF8'],
-			[""],
 			['GaboXey',				'gaboxey',			"Made the credit icons",						 'https://youtube.com/@gaboxey',		'775EF3'],
+			[""],
 			["Psych Engine Team"],
 			["Shadow Mario",		"shadowmario",		"Main Programmer and Head of Psych Engine",					"https://ko-fi.com/shadowmario",	"444444"],
 			["Riveren",				"riveren",			"Main Artist/Animator of Psych Engine",						"https://x.com/riverennn",			"14967B"],
@@ -136,7 +136,7 @@ class CreditsState extends MusicBeatState
 		#if mobile
 		addVirtualPad('UP_DOWN', 'A_B');
 		#end
-		
+
 		super.create();
 	}
 
