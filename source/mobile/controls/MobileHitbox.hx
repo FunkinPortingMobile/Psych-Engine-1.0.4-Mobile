@@ -58,8 +58,13 @@ class MobileHitbox extends TouchInputManager
 	{
 		for (btn in buttons)
 		{
-			remove(btn);
-			FlxDestroyUtil.destroy(btn);
+			if (btn != null)
+			{
+				FlxTween.cancelTweensOf(btn); 
+				
+				remove(btn);
+				FlxDestroyUtil.destroy(btn);
+			}
 		}
 		buttons = [];
 		buttonAction = null;
@@ -120,7 +125,7 @@ class MobileHitbox extends TouchInputManager
 		var graphicKey:String = Width + "x" + Height + "_" + Color;
 		var bgGraphic:flixel.graphics.FlxGraphic = _cachedGraphics.get(graphicKey);
 		
-		if (bgGraphic == null) {
+		if (bgGraphic == null || bgGraphic.bitmap == null) {
 			var shape:Shape = new Shape();
 			var matrix:Matrix = new Matrix();
 			
@@ -138,6 +143,9 @@ class MobileHitbox extends TouchInputManager
 			bitmap.draw(shape);
 			
 			bgGraphic = FlxG.bitmap.add(bitmap, false, "hitbox_" + graphicKey);
+			bgGraphic.persist = true;
+			bgGraphic.destroyOnNoUse = false; 
+			
 			_cachedGraphics.set(graphicKey, bgGraphic);
 		}
 		
