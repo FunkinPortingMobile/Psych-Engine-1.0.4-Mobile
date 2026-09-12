@@ -398,7 +398,7 @@ class WeekEditorState extends MusicBeatState implements PsychUIEventHandler.Psyc
 		if(PsychUIInputText.focusOn == null)
 		{
 			ClientPrefs.toggleVolumeKeys(true);
-			if(FlxG.keys.justPressed.ESCAPE)
+			if(FlxG.keys.justPressed.ESCAPE #if android || FlxG.android.justReleased.BACK #end)
 			{
 				if(!unsavedProgress)
 				{
@@ -422,14 +422,53 @@ class WeekEditorState extends MusicBeatState implements PsychUIEventHandler.Psyc
 	}
 
 	private static var _file:FileReference;
+
+	#if android
+	private static var _fileDialog:FileDialogHandler = new FileDialogHandler();
+	#end
+
 	public static function loadWeek() {
+		#if android
+		_fileDialog.openFiles('application/json', function()
+		{
+			onAndroidFileSelected(_fileDialog.data, _fileDialog.path);
+		});
+		#else
 		var jsonFilter:FileFilter = new FileFilter('JSON', 'json');
 		_file = new FileReference();
 		_file.addEventListener(#if desktop Event.SELECT #else Event.COMPLETE #end, onLoadComplete);
 		_file.addEventListener(Event.CANCEL, onLoadCancel);
 		_file.addEventListener(IOErrorEvent.IO_ERROR, onLoadError);
 		_file.browse([#if !mac jsonFilter #end]);
+		#end
 	}
+
+	#if android
+	private static function onAndroidFileSelected(rawJson:String, fileName:String):Void
+	{
+		try
+		{
+			var parsed:Dynamic = Json.parse(rawJson);
+			if(parsed.weekCharacters != null && parsed.weekName != null)
+			{
+				loadedWeek = cast parsed;
+				weekFileName = fileName;
+				if(StringTools.endsWith(weekFileName.toLowerCase(), '.json'))
+					weekFileName = weekFileName.substr(0, weekFileName.length - 5);
+				loadError = false;
+				unsavedProgress = false;
+				return;
+			}
+		}
+		catch (e:Dynamic)
+		{
+			trace('Error parsing selected week file: $e');
+		}
+
+		loadError = true;
+		loadedWeek = null;
+	}
+	#end
 	
 	public static var loadedWeek:WeekFile = null;
 	public static var loadError:Bool = false;
@@ -497,11 +536,19 @@ class WeekEditorState extends MusicBeatState implements PsychUIEventHandler.Psyc
 		var data:String = haxe.Json.stringify(weekFile, "\t");
 		if (data.length > 0)
 		{
+			#if android
+			_fileDialog.saveAndroid(weekFileName + '.json', data, function()
+			{
+				FlxG.log.notice("Successfully saved file.");
+				unsavedProgress = false;
+			});
+			#else
 			_file = new FileReference();
 			_file.addEventListener(#if desktop Event.SELECT #else Event.COMPLETE #end, onSaveComplete);
 			_file.addEventListener(Event.CANCEL, onSaveCancel);
 			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
 			_file.save(data, weekFileName + ".json");
+			#end
 		}
 	}
 	
@@ -588,6 +635,11 @@ class WeekEditorFreeplayState extends MusicBeatState implements PsychUIEventHand
 
 		addEditorBox();
 		changeSelection();
+
+		#if mobile
+		addVirtualPad('UP_DOWN', 'B');
+		#end
+
 		super.create();
 	}
 	
@@ -755,7 +807,7 @@ class WeekEditorFreeplayState extends MusicBeatState implements PsychUIEventHand
 		else
 		{
 			ClientPrefs.toggleVolumeKeys(true);
-			if(FlxG.keys.justPressed.ESCAPE) {
+			if(FlxG.keys.justPressed.ESCAPE #if mobile || virtualPad.getButton('buttonB').justPressed #end) {
 				if(!WeekEditorState.unsavedProgress)
 				{
 					MusicBeatState.switchState(new MasterEditorMenu());

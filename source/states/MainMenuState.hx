@@ -124,6 +124,10 @@ class MainMenuState extends MusicBeatState
 		#end
 
 		FlxG.camera.follow(camFollow, null, 0.15);
+
+		#if mobile
+		addVirtualPad('NONE', 'A');
+		#end
 	}
 
 	function createMenuItem(name:String, x:Float, y:Float):FlxSprite
@@ -338,8 +342,8 @@ class MainMenuState extends MusicBeatState
 					FlxTween.tween(memb, {alpha: 0}, 0.4, {ease: FlxEase.quadOut});
 				}
 			}
-			#if desktop
-			if (controls.justPressed('debug_1'))
+			#if (desktop || mobile)
+			if (controls.justPressed('debug_1') #if mobile || virtualPad.getButton('buttonA').justPressed #end)
 			{
 				selectedSomethin = true;
 				FlxG.mouse.visible = false;

@@ -11,6 +11,10 @@ import lime.ui.*;
 
 import flixel.FlxBasic;
 
+#if android
+import lime.system.JNI;
+#end
+
 //Currently only supports OPEN and SAVE, might change that in the future, who knows
 class FileDialogHandler extends FlxBasic
 {
@@ -21,6 +25,15 @@ class FileDialogHandler extends FlxBasic
 		_fileRef = new FileReferenceCustom();
 		_fileRef.addEventListener(Event.CANCEL, onCancelFn);
 		_fileRef.addEventListener(IOErrorEvent.IO_ERROR, onErrorFn);
+		
+		#if android
+		_androidCallback = {
+			onFileSelected: function(rawData:String, fileName:String):Void onFileCompleteA(rawData, fileName),
+			onFileSaved: function(fileName:String):Void onSaveCompleteA(fileName),
+			onFileCancelled: function():Void onCancelA(),
+			onFileError: function():Void onErrorA()
+		};
+		#end
 
 		super();
 	}
@@ -31,6 +44,12 @@ class FileDialogHandler extends FlxBasic
 	public var onError:Void->Void;
 
 	var _currentEvent:openfl.events.Event->Void;
+
+	#if android
+	private static var _browseFiles = JNI.createStaticMethod('mobile.backend.java.FileUtils', 'browseFiles', '(Ljava/lang/String;Lorg/haxe/lime/HaxeObject;)V');
+	private static var _saveFile = JNI.createStaticMethod('mobile.backend.java.FileUtils', 'saveFile', '(Ljava/lang/String;Ljava/lang/String;Lorg/haxe/lime/HaxeObject;)V');
+	var _androidCallback:Dynamic;
+	#end
 
 	public function save(?fileName:String = '', ?dataToSave:String = '', ?onComplete:Void->Void, ?onCancel:Void->Void, ?onError:Void->Void)
 	{
@@ -67,6 +86,27 @@ class FileDialogHandler extends FlxBasic
 		_fileRef.addEventListener(#if desktop Event.SELECT #else Event.COMPLETE #end, _currentEvent);
 		_fileRef.browseEx(OPEN, defaultName, title, filter);
 	}
+
+	#if android
+	public function openFiles(?mimeType:String = 'application/json', ?onComplete:Void->Void, ?onCancel:Void->Void, ?onError:Void->Void):Void
+	{
+		if(!completed)
+			throw new Exception('You must finish previous operation before starting a new one.');
+
+		_startUp(onComplete, onCancel, onError);
+		_browseFiles(mimeType, _androidCallback);
+	}
+
+	public function saveAndroid(fileName:String, dataToSave:String, ?onComplete:Void->Void, ?onCancel:Void->Void, ?onError:Void->Void):Void
+	{
+		if(!completed)
+			throw new Exception('You must finish previous operation before starting a new one.');
+
+		_dialogMode = SAVE;
+		_startUp(onComplete, onCancel, onError);
+		_saveFile(fileName, dataToSave, _androidCallback);
+	}
+	#end
 
 	public function openDirectory(?title:String = null, ?onComplete:Void->Void, ?onCancel:Void->Void, ?onError:Void->Void)
 	{
@@ -130,7 +170,7 @@ class FileDialogHandler extends FlxBasic
 	{
 		removeEvents();
 		this.completed = true;
-		if(onCancel != null) onError();
+		if(onCancel != null) onCancel();
 	}
 
 	function onErrorFn(_)
@@ -139,6 +179,36 @@ class FileDialogHandler extends FlxBasic
 		this.completed = true;
 		if(onError != null) onError();
 	}
+
+	#if android
+	function onFileCompleteA(rawData:String, fileName:String):Void
+	{
+		data = rawData;
+		path = fileName;
+		completed = true;
+		if(onComplete != null) onComplete();
+	}
+
+	function onSaveCompleteA(fileName:String):Void
+	{
+		path = fileName;
+		completed = true;
+		trace('Saved file to: $path');
+		if(onComplete != null) onComplete();
+	}
+
+	function onCancelA():Void
+	{
+		completed = true;
+		if(onCancel != null) onCancel();
+	}
+
+	function onErrorA():Void
+	{
+		completed = true;
+		if(onError != null) onError();
+	}
+	#end
 
 	function _startUp(onComplete:Void->Void, onCancel:Void->Void, onError:Void->Void)
 	{
@@ -169,6 +239,9 @@ class FileDialogHandler extends FlxBasic
 		onError = null;
 		data = null;
 		path = null;
+		#if android
+		_androidCallback = null;
+		#end
 		completed = true;
 		super.destroy();
 	}

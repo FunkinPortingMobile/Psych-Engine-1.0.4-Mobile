@@ -27,14 +27,17 @@ public class FileUtils extends Extension {
     private static boolean downloadSuccess = false;
     private static boolean isFinished = false;
     private static String contentToSave = "";
+    private static String saveFileName = "";
 
     public static org.haxe.lime.HaxeObject callbackObject;
 
-    public static void saveFile(final String fileName, final String data) {
+    public static void saveFile(final String fileName, final String data, final org.haxe.lime.HaxeObject callback) {
         if (data == null || data.isEmpty())
             return;
 
         contentToSave = data;
+        saveFileName = fileName;
+        callbackObject = callback;
 
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
@@ -85,6 +88,7 @@ public class FileUtils extends Extension {
                 }
             } else {
                 contentToSave = "";
+                notifyCallback("onFileCancelled", new Object[] {});
             }
             return true;
         }
@@ -95,6 +99,8 @@ public class FileUtils extends Extension {
                 if (uri != null && callbackObject != null) {
                     readBytesFromUri(uri);
                 }
+            } else {
+                notifyCallback("onFileCancelled", new Object[] {});
             }
             return true;
         }
@@ -117,9 +123,11 @@ public class FileUtils extends Extension {
                         fileOutputStream.close();
 
                         contentToSave = "";
+                        notifyCallback("onFileSaved", new Object[] { saveFileName });
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
+                    notifyCallback("onFileError", new Object[] {});
                 }
             }
         }).start();
@@ -139,18 +147,33 @@ public class FileUtils extends Extension {
                         byteBuffer.write(buffer, 0, len);
                     }
 
-                    byte[] fileBytes = byteBuffer.toByteArray();
-                    String fileName = "file.json";
+                    final String fileContent = new String(byteBuffer.toByteArray(), "UTF-8");
+                    final String fileName = "file.json";
 
-                    callbackObject.call("onFileSelected", new Object[] { fileBytes, fileName });
+                    notifyCallback("onFileSelected", new Object[] { fileContent, fileName });
 
                     inputStream.close();
                     byteBuffer.close();
                 } catch (Exception e) {
                     e.printStackTrace();
+                    notifyCallback("onFileError", new Object[] {});
                 }
             }
         }).start();
+    }
+
+    private static void notifyCallback(final String method, final Object[] args) {
+        final org.haxe.lime.HaxeObject callback = callbackObject;
+        if (callback == null) return;
+
+        Extension.callbackHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (callbackObject == callback) {
+                    callback.call(method, args);
+                }
+            }
+        });
     }
 
     public static boolean downloadFile(String fileURL, String savePath) {
