@@ -116,6 +116,12 @@ import ::APP_MAIN::;
 		}
 		#end
 
+		#if !munit
+		app.preloader.onComplete.add(function() {
+			app.window.stage.addChild(new ::APP_MAIN::());
+		});
+		#end
+
 		app.preloader.load();
 
 		#if !munit
