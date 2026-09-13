@@ -99,7 +99,6 @@ import ::APP_MAIN::;
 		#end
 		
 		#if mobile
-		mobile.backend.StorageSystem.getPermissions();
 		Sys.setCwd(mobile.backend.StorageSystem.getAssetsDirectory());
 		#end
 
