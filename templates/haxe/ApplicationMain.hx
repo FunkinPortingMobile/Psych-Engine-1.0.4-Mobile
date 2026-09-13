@@ -32,8 +32,9 @@ import ::APP_MAIN::;
 	    appMeta.set("packageName", "::meta.packageName::");
 	    appMeta.set("version", "::meta.version::");
 	
-	    var app = new openfl.display.Application(appMeta);
-
+	    var app = new openfl.display.Application();
+        app.meta = appMeta;
+		
 		#if !flash
 		::foreach windows::
 		var attributes:lime.ui.WindowAttributes =
