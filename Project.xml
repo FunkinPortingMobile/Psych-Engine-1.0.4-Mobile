@@ -207,6 +207,7 @@
 		<config:android permission="android.permission.CAPTURE_AUDIO_OUTPUT" />
 	
 		<android extension="mobile.backend.java.FileUtils" />
+		<templatePath name="templates" />
 	
 	    <android target-sdk-version="34" minimum-sdk-version="24" />
 		<certificate path="key.keystore" password="psychport" alias="psychport" alias-password="psychport" />
