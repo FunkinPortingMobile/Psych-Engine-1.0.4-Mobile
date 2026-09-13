@@ -23,16 +23,13 @@ import ::APP_MAIN::;
 		#end
 
 		#if !munit
-		final appMeta:Map<String, String> = [];
-
-	    appMeta.set("build", "::meta.buildNumber::");
-	    appMeta.set("company", "::meta.company::");
-	    appMeta.set("file", "::APP_FILE::");
-	    appMeta.set("name", "::meta.title::");
-	    appMeta.set("packageName", "::meta.packageName::");
-	    appMeta.set("version", "::meta.version::");
-	
-	    var app = new openfl.display.Application(appMeta);
+		var app = new lime.app.Application();
+		app.meta.set("build", "::meta.buildNumber::");
+		app.meta.set("company", "::meta.company::");
+		app.meta.set("file", "::APP_FILE::");
+		app.meta.set("name", "::meta.title::");
+		app.meta.set("packageName", "::meta.packageName::");
+		app.meta.set("version", "::meta.version::");
 
 		#if !flash
 		::foreach windows::
