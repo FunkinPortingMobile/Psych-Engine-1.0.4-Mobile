@@ -30,7 +30,7 @@ import ::APP_MAIN::;
 		app.meta.set("name", "::meta.title::");
 		app.meta.set("packageName", "::meta.packageName::");
 		app.meta.set("version", "::meta.version::");
-
+		
 		#if !flash
 		::foreach windows::
 		var attributes:lime.ui.WindowAttributes =
