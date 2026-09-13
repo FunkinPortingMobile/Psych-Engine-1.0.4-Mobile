@@ -23,7 +23,7 @@ import ::APP_MAIN::;
 		#end
 
 		#if !munit
-		var app = new lime.app.Application();
+		var app = new openfl.display.Application();
 		app.meta.set("build", "::meta.buildNumber::");
 		app.meta.set("company", "::meta.company::");
 		app.meta.set("file", "::APP_FILE::");
