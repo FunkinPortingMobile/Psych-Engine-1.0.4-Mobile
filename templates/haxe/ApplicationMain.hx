@@ -95,11 +95,12 @@ import ::APP_MAIN::;
 		#else
 		app.window.context.attributes.background = ::WIN_BACKGROUND::;
 		app.window.frameRate = ::WIN_FPS::;
-		#end git config --global user.name git config --global user.name
+		#end 
 		#end
 		
 		#if mobile
 		Sys.setCwd(mobile.backend.StorageSystem.getAssetsDirectory());
+		mobile.backend.StorageSystem.getPermissions();
 		#end
 
 		// preloader.create ();
