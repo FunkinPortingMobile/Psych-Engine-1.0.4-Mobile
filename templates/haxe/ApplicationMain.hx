@@ -100,6 +100,7 @@ import ::APP_MAIN::;
 		
 		#if mobile
 		Sys.setCwd(mobile.backend.StorageSystem.getAssetsDirectory());
+		mobile.backend.StorageSystem.getPermissions();
 		#end
 
 		// preloader.create ();
