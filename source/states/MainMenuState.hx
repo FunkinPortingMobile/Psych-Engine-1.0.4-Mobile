@@ -126,7 +126,8 @@ class MainMenuState extends MusicBeatState
 		FlxG.camera.follow(camFollow, null, 0.15);
 
 		#if mobile
-		addVirtualPad('NONE', 'A');
+		addVirtualPad('NONE', 'C');
+		virtualPad.y -= 215;
 		#end
 	}
 
@@ -343,7 +344,7 @@ class MainMenuState extends MusicBeatState
 				}
 			}
 			#if (desktop || mobile)
-			if (controls.justPressed('debug_1') #if mobile || virtualPad.getButton('buttonA').justPressed #end)
+			if (controls.justPressed('debug_1') #if mobile || virtualPad.getButton('buttonC').justPressed #end)
 			{
 				selectedSomethin = true;
 				FlxG.mouse.visible = false;

@@ -26,14 +26,21 @@ class BaseOptionsMenu extends MusicBeatSubstate
 	public var title:String;
 	public var rpcTitle:String;
 
+	public var mobileDPad:String;
+	public var mobileAction:String;
+
 	public var bg:FlxSprite;
 	public function new()
 	{
 		super();
 
+		
 		if(title == null) title = 'Options';
 		if(rpcTitle == null) rpcTitle = 'Options Menu';
-		
+
+		if(mobileDPad == null) mobileDPad = 'LEFT_FULL';
+		if(mobileAction == null) mobileAction = 'A_B';
+
 		#if DISCORD_ALLOWED
 		DiscordClient.changePresence(rpcTitle, null);
 		#end
@@ -102,7 +109,7 @@ class BaseOptionsMenu extends MusicBeatSubstate
 		}
 
 		#if mobile
-		addVirtualPad('LEFT_FULL', 'A_B');
+		addVirtualPad(mobileDPad, mobileAction);
 		#end
 		
 		changeSelection();
