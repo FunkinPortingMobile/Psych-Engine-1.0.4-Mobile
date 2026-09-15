@@ -4,6 +4,9 @@ import flixel.FlxObject;
 import flixel.input.keyboard.FlxKey;
 import flixel.util.FlxDestroyUtil;
 import flash.events.KeyboardEvent;
+#if mobile
+import openfl.events.TextEvent;
+#end
 import lime.system.Clipboard;
 
 enum abstract AccentCode(Int) from Int from UInt to Int to UInt
@@ -85,7 +88,11 @@ class PsychUIInputText extends FlxSpriteGroup
 		updateHitbox();
 		this.text = text;
 
+		#if mobile
+		FlxG.stage.addEventListener(TextEvent.TEXT_INPUT, onTextInput);
+		#else
 		FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+		#end
 	}
 	
 	public var selectIndex:Int = -1;
@@ -220,6 +227,11 @@ class PsychUIInputText extends FlxSpriteGroup
 			updateCaret();
 			return;
 		}
+
+		#if mobile
+		// fix the duplicate caracteres
+		if(charCode >= 32) return;
+		#end
 
 		static final ignored:Array<FlxKey> = [SHIFT, CONTROL, ESCAPE];
 		if(ignored.contains(flxKey)) return;
@@ -375,6 +387,18 @@ class PsychUIInputText extends FlxSpriteGroup
 		updateCaret();
 	}
 
+	#if mobile
+	function onTextInput(e:TextEvent):Void
+	{
+		if(focusOn != this || e.text == null || e.text.length == 0) return;
+
+		for (i in 0...e.text.length)
+			_typeLetter(e.text.charCodeAt(i));
+
+		updateCaret();
+	}
+	#end
+
 	public dynamic function onPressEnter(e:KeyboardEvent)
 		focusOn = null;
 
@@ -386,6 +410,10 @@ class PsychUIInputText extends FlxSpriteGroup
 			if(focusOn.unfocus != null) focusOn.unfocus();
 			focusOn.resetCaret();
 		}
+		#if mobile
+		if(FlxG.stage != null && FlxG.stage.window != null)
+			FlxG.stage.window.textInputEnabled = v != null;
+		#end
 		return (focusOn = v);
 	}
 
@@ -541,7 +569,13 @@ class PsychUIInputText extends FlxSpriteGroup
 	{
 		_boundaries = null;
 		if(focusOn == this) focusOn = null;
+
+		#if mobile
+		FlxG.stage.removeEventListener(TextEvent.TEXT_INPUT, onTextInput);
+		#else
 		FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
+		#end
+
 		super.destroy();
 	}
 
