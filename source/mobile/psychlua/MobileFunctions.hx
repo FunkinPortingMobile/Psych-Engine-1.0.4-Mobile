@@ -5,9 +5,6 @@ import psychlua.FunkinLua;
 import psychlua.ModchartSprite;
 import psychlua.LuaUtils;
 
-import mobile.controls.MobileVirtualPad.MobileDPadMode;
-import mobile.controls.MobileVirtualPad.MobileActionMode;
-
 class MobileFunctions
 {
 	private static function getTargetState():Dynamic {
@@ -89,7 +86,7 @@ class MobileFunctions
 
 		Lua_helper.add_callback(lua, "makeWallpaperSprite", function(tag:String, ?x:Float = 0, ?y:Float = 0) {
 			tag = tag.replace('.', '');
-			LuaUtils.resetSpriteTag(tag);
+			LuaUtils.destroyObject(tag);
 			
 			var leSprite:ModchartSprite = new ModchartSprite(x, y);
 			
@@ -125,7 +122,7 @@ class MobileFunctions
 			#end
 			leSprite.antialiasing = backend.ClientPrefs.data.antialiasing;
 			
-			PlayState.instance.modchartSprites.set(tag, leSprite);
+			MusicBeatState.getVariables().set(tag, leSprite);
 			leSprite.active = true;
 		});
 
@@ -148,13 +145,7 @@ class MobileFunctions
 		{
 			var target = getTargetState();
 			if (target != null) {
-				try {
-					var dPad:MobileDPadMode = Type.createEnum(MobileDPadMode, dPadMode);
-					var action:MobileActionMode = Type.createEnum(MobileActionMode, actionMode);
-					target.addVirtualPad(dPad, action);
-				} catch (e:Dynamic) {
-					FunkinLua.luaTrace("addVirtualPad: Error! Invalid DPadMode or ActionMode string.", false, false, 0xFFFF0000);
-				}
+				target.addVirtualPad(dPadMode, actionMode);
 			}
 		});
 

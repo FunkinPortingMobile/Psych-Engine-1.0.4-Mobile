@@ -37,6 +37,9 @@ import psychlua.HScript;
 #end
 import psychlua.DebugLuaText;
 import psychlua.ModchartSprite;
+#if mobile
+import mobile.psychlua.MobileFunctions;
+#end
 
 import flixel.input.keyboard.FlxKey;
 import flixel.input.gamepad.FlxGamepadInputID;
@@ -1566,6 +1569,7 @@ class FunkinLua {
 		CustomSubstate.implement(this);
 		ShaderFunctions.implement(this);
 		DeprecatedFunctions.implement(this);
+		#if mobile MobileFunctions.implement(this); #end
 
 		for (name => func in customFunctions)
 		{

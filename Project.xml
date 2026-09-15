@@ -69,13 +69,19 @@
 	<define name="CRASH_HANDLER" />
 
 	<!-- Assets -->
-	<assets path="assets/fonts" type="binary" />
+	<assets path="assets" include="*.ttf|*.otf" type="binary" nocompress="true"/>
 	<assets path="assets/mobile"        if="mobile"/>
 	<assets path="assets/fonts" />
 	<assets path="assets/shared"        exclude="*.ogg" if="web"/>
 	<assets path="assets/shared"        exclude="*.mp3" unless="web"/>
-	<assets path="assets/embed"         exclude="*.ogg" if="web" embed="true"/>
-	<assets path="assets/embed"         exclude="*.mp3" unless="web" embed="true"/>
+	<section if="mobile">
+	    <assets path="assets/embed"         exclude="*.ogg" if="web" embed="false"/>
+	    <assets path="assets/embed"         exclude="*.mp3" unless="web" embed="false"/>
+	</section>
+	<section unless="mobile">
+	    <assets path="assets/embed"         exclude="*.ogg" if="web" embed="true"/>
+	    <assets path="assets/embed"         exclude="*.mp3" unless="web" embed="true"/>
+	</section>
 	<assets path="assets/videos"        if="VIDEOS_ALLOWED"/>
 	<assets path="assets/songs"         exclude="*.ogg" if="web"/>
 	<assets path="assets/songs"         exclude="*.mp3" unless="web"/>
