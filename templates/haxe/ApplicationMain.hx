@@ -1,15 +1,19 @@
 package;
 
 import ::APP_MAIN::;
+import lime.app.Application as LimeApplication;
+import lime.system.System;
+import lime.ui.WindowAttributes;
+import openfl.display.Application as OpenFLApplication;
 
 @:access(lime.app.Application)
 @:access(lime.system.System)
-
-@:dox(hide) class ApplicationMain
+@:dox(hide)
+class ApplicationMain
 {
-	public static function main()
+	public static function main():Void
 	{
-		lime.system.System.__registerEntryPoint("::APP_FILE::", create);
+		System.__registerEntryPoint("::APP_FILE::", create);
 
 		#if (!html5 || munit)
 		create(null);
@@ -23,39 +27,61 @@ import ::APP_MAIN::;
 		#end
 
 		#if !munit
-		var app = new openfl.display.Application();
+		var app = new OpenFLApplication();
+		
+		setupMetadata(app);
+		setupWindows(app, config);
+		setupPreloader(app);
+		
+		#if mobile
+		Sys.setCwd(mobile.backend.StorageSystem.getAssetsDirectory());
+		mobile.backend.StorageSystem.getPermissions();
+		#end
+
+		app.preloader.onComplete.add(function() {
+			app.window.stage.addChild(new ::APP_MAIN::());
+		});
+
+		app.preloader.load();
+		start(app);
+		
+		#else
+		start(null);
+		#end
+	}
+
+	private static inline function setupMetadata(app:OpenFLApplication):Void
+	{
 		app.meta.set("build", "::meta.buildNumber::");
 		app.meta.set("company", "::meta.company::");
 		app.meta.set("file", "::APP_FILE::");
 		app.meta.set("name", "::meta.title::");
 		app.meta.set("packageName", "::meta.packageName::");
 		app.meta.set("version", "::meta.version::");
-		
+	}
+
+	private static function setupWindows(app:OpenFLApplication, config:Dynamic):Void
+	{
 		#if !flash
 		::foreach windows::
-		var attributes:lime.ui.WindowAttributes =
-			{
-				allowHighDPI: ::allowHighDPI::,
-				alwaysOnTop: ::alwaysOnTop::,
-				borderless: ::borderless::,
-				// display: ::display::,
-				element: null,
-				frameRate: ::fps::,
-				#if !web fullscreen: ::fullscreen::, #end
-				height: ::height::,
-				hidden: #if munit true #else ::hidden:: #end,
-				maximized: ::maximized::,
-				minimized: ::minimized::,
-				parameters: ::parameters::,
-				resizable: ::resizable::,
-				title: "::title::",
-				width: ::width::,
-				x: ::x::,
-				y: ::y::,
-			};
-
-		attributes.context =
-			{
+		var attributes:WindowAttributes = {
+			allowHighDPI: ::allowHighDPI::,
+			alwaysOnTop: ::alwaysOnTop::,
+			borderless: ::borderless::,
+			element: null,
+			frameRate: ::fps::,
+			#if !web fullscreen: ::fullscreen::, #end
+			height: ::height::,
+			hidden: #if munit true #else ::hidden:: #end,
+			maximized: ::maximized::,
+			minimized: ::minimized::,
+			parameters: ::parameters::,
+			resizable: ::resizable::,
+			title: "::title::",
+			width: ::width::,
+			x: ::x::,
+			y: ::y::,
+			context: {
 				antialiasing: ::antialiasing::,
 				background: ::background::,
 				colorDepth: ::colorDepth::,
@@ -64,7 +90,8 @@ import ::APP_MAIN::;
 				stencil: ::stencilBuffer::,
 				type: null,
 				vsync: ::vsync::
-			};
+			}
+		};
 
 		if (app.window == null)
 		{
@@ -72,118 +99,85 @@ import ::APP_MAIN::;
 			{
 				for (field in Reflect.fields(config))
 				{
-					if (Reflect.hasField(attributes, field))
-					{
+					if (Reflect.hasField(attributes, field)) {
 						Reflect.setField(attributes, field, Reflect.field(config, field));
 					}
-					else if (Reflect.hasField(attributes.context, field))
-					{
+					else if (Reflect.hasField(attributes.context, field)) {
 						Reflect.setField(attributes.context, field, Reflect.field(config, field));
 					}
 				}
 			}
 
 			#if sys
-			lime.system.System.__parseArguments(attributes);
+			System.__parseArguments(attributes);
 			#end
 		}
 
 		app.createWindow(attributes);
 		::end::
+		
 		#elseif air
 		app.window.title = "::meta.title::";
 		#else
 		app.window.context.attributes.background = ::WIN_BACKGROUND::;
 		app.window.frameRate = ::WIN_FPS::;
-		#end 
 		#end
-		
-		#if mobile
-		Sys.setCwd(mobile.backend.StorageSystem.getAssetsDirectory());
-		mobile.backend.StorageSystem.getPermissions();
-		#end
+	}
 
-		// preloader.create ();
-
+	private static inline function setupPreloader(app:OpenFLApplication):Void
+	{
 		#if !disable_preloader_assets
-		for (library in ManifestResources.preloadLibraries)
-		{
+		for (library in ManifestResources.preloadLibraries) {
 			app.preloader.addLibrary(library);
 		}
 
-		for (name in ManifestResources.preloadLibraryNames)
-		{
+		for (name in ManifestResources.preloadLibraryNames) {
 			app.preloader.addLibraryName(name);
 		}
 		#end
-
-		#if !munit
-		app.preloader.onComplete.add(function() {
-			app.window.stage.addChild(new ::APP_MAIN::());
-		});
-		#end
-
-		app.preloader.load();
-
-		#if !munit
-		start(app);
-		#end
 	}
 
-	public static function start(app:lime.app.Application = null):Void
+	public static function start(app:LimeApplication = null):Void
 	{
 		#if !munit
-
 		var result = app.exec();
 
 		#if (sys && !ios && !nodejs && !webassembly)
-		lime.system.System.exit(result);
+		System.exit(result);
 		#end
 
 		#else
-
 		new ::APP_MAIN::();
-
 		#end
 	}
 
-	@:noCompletion @:dox(hide) public static function __init__()
+	@:noCompletion @:dox(hide) 
+	public static function __init__()
 	{
-		var init = lime.app.Application;
+		var init = LimeApplication;
 
 		#if neko
-		// Copy from https://github.com/HaxeFoundation/haxe/blob/development/std/neko/_std/Sys.hx#L164
-		// since Sys.programPath () isn't available in __init__
-		var sys_program_path =
-			{
-				var m = neko.vm.Module.local().name;
-				try
-				{
-					sys.FileSystem.fullPath(m);
-				}
-				catch (e:Dynamic)
-				{
-					// maybe the neko module name was supplied without .n extension...
-					if (!StringTools.endsWith(m, ".n"))
-					{
-						try
-						{
-							sys.FileSystem.fullPath(m + ".n");
-						}
-						catch (e:Dynamic)
-						{
-							m;
-						}
+		var sysProgramPath = {
+			var moduleName = neko.vm.Module.local().name;
+			try {
+				sys.FileSystem.fullPath(moduleName);
+			} catch (e:Dynamic) {
+				if (!StringTools.endsWith(moduleName, ".n")) {
+					try {
+						sys.FileSystem.fullPath(moduleName + ".n");
+					} catch (e:Dynamic) {
+						moduleName;
 					}
-					else
-					{
-						m;
-					}
+				} else {
+					moduleName;
 				}
-			};
+			}
+		};
 
 		var loader = new neko.vm.Loader(untyped $loader);
-		loader.addPath(haxe.io.Path.directory(#if (haxe_ver >= 3.3) sys_program_path #else Sys.executablePath() #end));
+		var basePath = haxe.io.Path.directory(#if (haxe_ver >= 3.3) sysProgramPath #else Sys.executablePath() #end);
+		
+		loader.addPath(basePath);
 		loader.addPath("./");
 		loader.addPath("@executable_path/");
 		#end
