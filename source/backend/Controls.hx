@@ -253,7 +253,7 @@ class Controls
 	}
 	#end
 
-	// IGNORE THESE
+	// DON'T IGNORE THESE
 	public static var instance:Controls;
 	public function new()
 	{

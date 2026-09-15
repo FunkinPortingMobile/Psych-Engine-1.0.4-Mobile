@@ -88,11 +88,8 @@ class PsychUIInputText extends FlxSpriteGroup
 		updateHitbox();
 		this.text = text;
 
-		#if mobile
 		FlxG.stage.addEventListener(TextEvent.TEXT_INPUT, onTextInput);
-		#else
 		FlxG.stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
-		#end
 	}
 	
 	public var selectIndex:Int = -1;
@@ -108,6 +105,9 @@ class PsychUIInputText extends FlxSpriteGroup
 		var keyCode:Int = e.keyCode;
 		var charCode:Int = e.charCode;
 		var flxKey:FlxKey = cast keyCode;
+		#if mobile
+		if(flxKey != BACKSPACE && flxKey != DELETE) return;
+		#end
 
 		// Fix missing cedilla
 		switch(keyCode)
@@ -393,7 +393,28 @@ class PsychUIInputText extends FlxSpriteGroup
 		if(focusOn != this || e.text == null || e.text.length == 0) return;
 
 		for (i in 0...e.text.length)
-			_typeLetter(e.text.charCodeAt(i));
+		{
+			var charCode:Int = e.text.charCodeAt(i);
+			if(charCode == 8 || charCode == 127)
+			{
+				if(selectIndex > -1 && selectIndex != caretIndex)
+				{
+					deleteSelection();
+				}
+				else if(caretIndex > 0)
+				{
+					var lastText:String = text;
+					text = text.substring(0, caretIndex - 1) + text.substring(caretIndex);
+					caretIndex--;
+					if(onChange != null) onChange(lastText, text);
+					if(broadcastInputTextEvent) PsychUIEventHandler.event(CHANGE_EVENT, this);
+				}
+			}
+			else
+			{
+				_typeLetter(charCode);
+			}
+		}
 
 		updateCaret();
 	}
@@ -570,11 +591,8 @@ class PsychUIInputText extends FlxSpriteGroup
 		_boundaries = null;
 		if(focusOn == this) focusOn = null;
 
-		#if mobile
 		FlxG.stage.removeEventListener(TextEvent.TEXT_INPUT, onTextInput);
-		#else
 		FlxG.stage.removeEventListener(KeyboardEvent.KEY_DOWN, onKeyDown);
-		#end
 
 		super.destroy();
 	}
