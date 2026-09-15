@@ -163,30 +163,52 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 
 		if(ClientPrefs.data.cacheOnGPU) Paths.clearUnusedMemory();
 
+		#if mobile
+		addVirtualPad('LEFT_FULL', 'CHARACTER_EDITOR');
+		addVirtualPadCamera();
+		#end
+
 		super.create();
 	}
 
 	function addHelpScreen()
 	{
-		var str:Array<String> = ["CAMERA",
-		"E/Q - Camera Zoom In/Out",
-		"J/K/L/I - Move Camera",
-		"R - Reset Camera Zoom",
-		"",
-		"CHARACTER",
-		"Ctrl + R - Reset Current Offset",
-		"Ctrl + C - Copy Current Offset",
-		"Ctrl + V - Paste Copied Offset on Current Animation",
-		"Ctrl + Z - Undo Last Paste or Reset",
-		"W/S - Previous/Next Animation",
-		"Space - Replay Animation",
-		"Arrow Keys/Mouse & Right Click - Move Offset",
-		"A/D - Frame Advance (Back/Forward)",
-		"",
-		"OTHER",
-		"F12 - Toggle Silhouettes",
-		"Hold Shift - Move Offsets 10x faster and Camera 4x faster",
-		"Hold Control - Move camera 4x slower"];
+		var str:String = "";
+		#if !mobile
+		str = "CAMERA
+        \nE/Q - Camera Zoom In/Out
+        \nJ/K/L/I - Move Camera
+        \nR - Reset Camera Zoom
+        \n
+        \nCHARACTER
+        \nCtrl + R - Reset Current Offset
+        \nCtrl + C - Copy Current Offset
+        \nCtrl + V - Paste Copied Offset on Current Animation
+        \nCtrl + Z - Undo Last Paste or Reset
+        \nW/S - Previous/Next Animation
+        \nSpace - Replay Animation
+        \nArrow Keys/Mouse & Right Click - Move Offset
+        \nA/D - Frame Advance (Back/Forward)
+        \n
+        \nOTHER
+        \nF12 - Toggle Silhouettes
+        \nHold Shift - Move Offsets 10x faster and Camera 4x faster
+        \nHold Control - Move camera 4x slower";
+		#else
+		str = "CAMERA
+        \nB/C - Camera Zoom In/Out
+        \nG + Arrow Buttons - Move Camera
+        \nA - Reset Camera Zoom
+        \n
+        \nCHARACTER
+        \nA - Reset Current Offset
+        \nD/X - Previous/Next Animation
+        \nArrow Buttons - Move Offset
+        \n
+        \nOTHER
+        \nV - Toggle Silhouettes
+        \nHold C - Move Offsets 10x faster and Camera 4x faster";
+		#end
 
 		helpBg = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
 		helpBg.scale.set(FlxG.width, FlxG.height);
@@ -198,7 +220,8 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 
 		helpTexts = new FlxSpriteGroup();
 		helpTexts.cameras = [camHUD];
-		for (i => txt in str)
+		var helpLines:Array<String> = str.split('\n');
+		for (i => txt in helpLines)
 		{
 			if(txt.length < 1) continue;
 
@@ -209,7 +232,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			helpText.borderSize = 1;
 			helpText.screenCenter();
 			add(helpText);
-			helpText.y += ((i - str.length/2) * 32) + 16;
+			helpText.y += ((i - helpLines.length/2) * 32) + 16;
 			helpText.active = false;
 			helpTexts.add(helpText);
 		}
@@ -886,12 +909,12 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		if (FlxG.keys.pressed.I) FlxG.camera.scroll.y -= elapsed * 500 * shiftMult * ctrlMult;
 
 		var lastZoom = FlxG.camera.zoom;
-		if(FlxG.keys.justPressed.R && !FlxG.keys.pressed.CONTROL) FlxG.camera.zoom = 1;
-		else if (FlxG.keys.pressed.E && FlxG.camera.zoom < 3) {
+		if(FlxG.keys.justPressed.R && !FlxG.keys.pressed.CONTROL #if mobile || virtualPad.getButton('buttonA').justPressed #end) FlxG.camera.zoom = 1;
+		else if (FlxG.keys.pressed.E #if mobile || virtualPad.getButton('buttonB').justPressed #end && FlxG.camera.zoom < 3) {
 			FlxG.camera.zoom += elapsed * FlxG.camera.zoom * shiftMult * ctrlMult;
 			if(FlxG.camera.zoom > 3) FlxG.camera.zoom = 3;
 		}
-		else if (FlxG.keys.pressed.Q && FlxG.camera.zoom > 0.1) {
+		else if (FlxG.keys.pressed.Q #if mobile || virtualPad.getButton('buttonC').pressed #end && FlxG.camera.zoom > 0.1) {
 			FlxG.camera.zoom -= elapsed * FlxG.camera.zoom * shiftMult * ctrlMult;
 			if(FlxG.camera.zoom < 0.1) FlxG.camera.zoom = 0.1;
 		}
@@ -902,8 +925,10 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		var changedAnim:Bool = false;
 		if(anims.length > 1)
 		{
-			if(FlxG.keys.justPressed.W && (changedAnim = true)) curAnim--;
-			else if(FlxG.keys.justPressed.S && (changedAnim = true)) curAnim++;
+			if ((FlxG.keys.justPressed.W #if mobile || virtualPad.getButton('buttonD').justPressed #end) && (changedAnim = true))
+				curAnim--;
+			else if ((FlxG.keys.justPressed.S #if mobile || virtualPad.getButton('buttonX').justPressed #end) && (changedAnim = true))
+				curAnim++;
 
 			if(changedAnim)
 			{
@@ -915,8 +940,18 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		}
 
 		var changedOffset = false;
-		var moveKeysP = [FlxG.keys.justPressed.LEFT, FlxG.keys.justPressed.RIGHT, FlxG.keys.justPressed.UP, FlxG.keys.justPressed.DOWN];
-		var moveKeys = [FlxG.keys.pressed.LEFT, FlxG.keys.pressed.RIGHT, FlxG.keys.pressed.UP, FlxG.keys.pressed.DOWN];
+		var moveKeysP = [
+			 FlxG.keys.justPressed.LEFT  #if mobile || virtualPad.getButton('buttonLeft').justPressed #end,
+			 FlxG.keys.justPressed.RIGHT #if mobile || virtualPad.getButton('buttonRight').justPressed #end,
+			 FlxG.keys.justPressed.UP    #if mobile || virtualPad.getButton('buttonUp').justPressed #end,
+			 FlxG.keys.justPressed.DOWN  #if mobile || virtualPad.getButton('buttonDown').justPressed #end];
+
+		var moveKeys = [
+			 FlxG.keys.pressed.LEFT  #if mobile || virtualPad.getButton('buttonLeft').pressed #end,
+		     FlxG.keys.pressed.RIGHT #if mobile || virtualPad.getButton('buttonRight').pressed #end,
+			 FlxG.keys.pressed.UP    #if mobile || virtualPad.getButton('buttonUp').pressed #end,
+			 FlxG.keys.pressed.DOWN  #if mobile || virtualPad.getButton('buttonDown').pressed #end];
+
 		if(moveKeysP.contains(true))
 		{
 			character.offset.x += ((moveKeysP[0] ? 1 : 0) - (moveKeysP[1] ? 1 : 0)) * shiftMultBig;
@@ -956,7 +991,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 				copiedOffset[1] = character.offset.y;
 				changedOffset = true;
 			}
-			else if(FlxG.keys.justPressed.V)
+			else if(FlxG.keys.justPressed.V #if mobile || virtualPad.getButton('buttonY').justPressed #end)
 			{
 				undoOffsets = [character.offset.x, character.offset.y];
 				character.offset.x = copiedOffset[0];
@@ -1040,10 +1075,10 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		frameAdvanceText.color = clr;
 
 		// OTHER CONTROLS
-		if(FlxG.keys.justPressed.F12)
+		if(FlxG.keys.justPressed.F12 #if mobile || virtualPad.getButton('buttonV').justPressed #end)
 			silhouettes.visible = !silhouettes.visible;
 
-		if(FlxG.keys.justPressed.F1 || (helpBg.visible && FlxG.keys.justPressed.ESCAPE))
+		if(FlxG.keys.justPressed.F1 #if mobile || virtualPad.getButton('buttonZ').justPressed #end || (helpBg.visible && FlxG.keys.justPressed.ESCAPE))
 		{
 			helpBg.visible = !helpBg.visible;
 			helpTexts.visible = helpBg.visible;
@@ -1245,6 +1280,9 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 
 	// save
 	var _file:FileReference;
+	#if android
+	var _fileDialog:FileDialogHandler = new FileDialogHandler();
+	#end
 	function onSaveComplete(_):Void
 	{
 		if(_file == null) return;
@@ -1304,11 +1342,19 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 
 		if (data.length > 0)
 		{
+			#if android
+			if(!_fileDialog.completed) return;
+			_fileDialog.saveAndroid('$_char.json', data, function()
+			{
+				FlxG.log.notice("Successfully saved file.");
+			});
+			#else
 			_file = new FileReference();
 			_file.addEventListener(#if desktop Event.SELECT #else Event.COMPLETE #end, onSaveComplete);
 			_file.addEventListener(Event.CANCEL, onSaveCancel);
 			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
 			_file.save(data, '$_char.json');
+			#end
 		}
 	}
 }

@@ -126,13 +126,17 @@ class StorageSystem
 			}
 			else
 			{
+				#if debug
 				trace("Running silent integrity check...");
+				#end
 				var restoredAssets = copyFromAPK("assets/", null, false, getAssetsDirectory());
 				var restoredContent = copyFromAPK("mods/", null, false);
 				
 				if (restoredAssets > 0 || restoredContent > 0)
 				{
+					#if debug
 					trace('Integrity Check fixed missing files! Restored: ${restoredAssets + restoredContent} files.');
+					#end
 				}
 				
 				return false;

@@ -319,7 +319,9 @@ class AlphaCharacter extends FlxSprite
 						allLetters.set(character, {anim: letterData.animation, offsets: letterData.normal, offsetsBold: letterData.bold});
 				}
 			}
+			#if debug
 			trace('Reloaded letters successfully ($path)!');
+			#end
 		}
 		catch(e:Dynamic)
 		{
