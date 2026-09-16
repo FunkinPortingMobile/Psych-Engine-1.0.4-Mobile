@@ -1,8 +1,5 @@
 package states.editors;
 
-import openfl.net.FileReference;
-import openfl.events.Event;
-import openfl.events.IOErrorEvent;
 import flash.net.FileFilter;
 import haxe.Json;
 
@@ -63,6 +60,11 @@ class MenuCharacterEditorState extends MusicBeatState implements PsychUIEventHan
 		addEditorBox();
 		FlxG.mouse.visible = true;
 		updateCharacters();
+
+		#if mobile
+		addVirtualPad('LEFT_FULL', 'A_B_C');
+		virtualPad.y -= 260;
+		#end
 
 		super.create();
 	}
@@ -212,7 +214,7 @@ class MenuCharacterEditorState extends MusicBeatState implements PsychUIEventHan
 		if(PsychUIInputText.focusOn == null)
 		{
 			ClientPrefs.toggleVolumeKeys(true);
-			if(FlxG.keys.justPressed.ESCAPE) {
+			if(FlxG.keys.justPressed.ESCAPE #if mobile || virtualPad.getButton('buttonB').justPressed #end) {
 				if(!unsavedProgress)
 				{
 					MusicBeatState.switchState(new states.editors.MasterEditorMenu());
@@ -222,26 +224,26 @@ class MenuCharacterEditorState extends MusicBeatState implements PsychUIEventHan
 			}
 
 			var shiftMult:Int = 1;
-			if(FlxG.keys.pressed.SHIFT) shiftMult = 10;
+			if(FlxG.keys.pressed.SHIFT #if mobile || virtualPad.getButton('buttonC').pressed #end) shiftMult = 10;
 
-			if(FlxG.keys.justPressed.LEFT) {
+			if(FlxG.keys.justPressed.LEFT #if mobile || virtualPad.getButton('buttonLeft').justPressed #end) {
 				characterFile.position[0] += shiftMult;
 				updateOffset();
 			}
-			if(FlxG.keys.justPressed.RIGHT) {
+			if(FlxG.keys.justPressed.RIGHT #if mobile || virtualPad.getButton('buttonRight').justPressed #end) {
 				characterFile.position[0] -= shiftMult;
 				updateOffset();
 			}
-			if(FlxG.keys.justPressed.UP) {
+			if(FlxG.keys.justPressed.UP #if mobile || virtualPad.getButton('buttonUp').justPressed #end) {
 				characterFile.position[1] += shiftMult;
 				updateOffset();
 			}
-			if(FlxG.keys.justPressed.DOWN) {
+			if(FlxG.keys.justPressed.DOWN #if mobile || virtualPad.getButton('buttonDown').justPressed #end) {
 				characterFile.position[1] -= shiftMult;
 				updateOffset();
 			}
 
-			if(FlxG.keys.justPressed.SPACE && characterTypeRadio.checked == 1) {
+			if(FlxG.keys.justPressed.SPACE #if mobile || virtualPad.getButton('buttonA').justPressed #end && characterTypeRadio.checked == 1) {
 				grpWeekCharacters.members[characterTypeRadio.checked].animation.play('confirm', true);
 			}
 		}
@@ -261,74 +263,47 @@ class MenuCharacterEditorState extends MusicBeatState implements PsychUIEventHan
 		txtOffsets.text = '' + characterFile.position;
 	}
 
-	var _file:FileReference = null;
+	var fileDialog:FileDialogHandler = new FileDialogHandler();
 	function loadCharacter() {
-		var jsonFilter:FileFilter = new FileFilter('JSON', 'json');
-		_file = new FileReference();
-		_file.addEventListener(#if desktop Event.SELECT #else Event.COMPLETE #end, onLoadComplete);
-		_file.addEventListener(Event.CANCEL, onLoadCancel);
-		_file.addEventListener(IOErrorEvent.IO_ERROR, onLoadError);
-		_file.browse([#if !mac jsonFilter #end]);
+		#if android
+		fileDialog.openFiles('application/json', onLoadComplete, onLoadCancel, onLoadError);
+		#else
+		fileDialog.open(null, 'Load Character', [new FileFilter('JSON', '*.json')], onLoadComplete, onLoadCancel, onLoadError);
+		#end
 	}
 
-	function onLoadComplete(_):Void
+	function onLoadComplete():Void
 	{
-		_file.removeEventListener(#if desktop Event.SELECT #else Event.COMPLETE #end, onLoadComplete);
-		_file.removeEventListener(Event.CANCEL, onLoadCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
-
-		#if sys
-		var fullPath:String = null;
-		@:privateAccess
-		if(_file.__path != null) fullPath = _file.__path;
-
-		if(fullPath != null) {
-			var rawJson:String = File.getContent(fullPath);
-			if(rawJson != null) {
-				var loadedChar:MenuCharacterFile = cast Json.parse(rawJson);
-				if(loadedChar.idle_anim != null && loadedChar.confirm_anim != null) //Make sure it's really a character
-				{
-					var cutName:String = _file.name.substr(0, _file.name.length - 5);
-					trace("Successfully loaded file: " + cutName);
-					characterFile = loadedChar;
-					reloadSelectedCharacter();
-					imageInputText.text = characterFile.image;
-					idleInputText.text = characterFile.image;
-					confirmInputText.text = characterFile.image;
-					scaleStepper.value = characterFile.scale;
-					updateOffset();
-					_file = null;
-					return;
-				}
-			}
+		var loadedChar:MenuCharacterFile = cast Json.parse(fileDialog.data);
+		if(loadedChar.idle_anim != null && loadedChar.confirm_anim != null)
+		{
+			trace('Successfully loaded file: ' + fileDialog.path);
+			characterFile = loadedChar;
+			reloadSelectedCharacter();
+			imageInputText.text = characterFile.image;
+			idleInputText.text = characterFile.idle_anim;
+			confirmInputText.text = characterFile.confirm_anim;
+			scaleStepper.value = characterFile.scale;
+			flipXCheckbox.checked = characterFile.flipX;
+			antialiasingCheckbox.checked = characterFile.antialiasing;
+			updateOffset();
+			unsavedProgress = false;
 		}
-		_file = null;
-		#else
-		trace("File couldn't be loaded! You aren't on Desktop, are you?");
-		#end
 	}
 
 	/**
 		* Called when the save file dialog is cancelled.
 		*/
-	function onLoadCancel(_):Void
+	function onLoadCancel():Void
 	{
-		_file.removeEventListener(#if desktop Event.SELECT #else Event.COMPLETE #end, onLoadComplete);
-		_file.removeEventListener(Event.CANCEL, onLoadCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
-		_file = null;
 		trace("Cancelled file loading.");
 	}
 
 	/**
 		* Called if there is an error while saving the gameplay recording.
 		*/
-	function onLoadError(_):Void
+	function onLoadError():Void
 	{
-		_file.removeEventListener(#if desktop Event.SELECT #else Event.COMPLETE #end, onLoadComplete);
-		_file.removeEventListener(Event.CANCEL, onLoadCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
-		_file = null;
 		trace("Problem loading file");
 	}
 
@@ -339,43 +314,32 @@ class MenuCharacterEditorState extends MusicBeatState implements PsychUIEventHan
 			var splittedImage:Array<String> = imageInputText.text.trim().split('_');
 			var characterName:String = splittedImage[splittedImage.length-1].toLowerCase().replace(' ', '');
 
-			_file = new FileReference();
-			_file.addEventListener(#if desktop Event.SELECT #else Event.COMPLETE #end, onSaveComplete);
-			_file.addEventListener(Event.CANCEL, onSaveCancel);
-			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-			_file.save(data, characterName + ".json");
+			#if android
+			fileDialog.saveAndroid(characterName + '.json', data, onSaveComplete, onSaveCancel, onSaveError);
+			#else
+			fileDialog.save(characterName + '.json', data, onSaveComplete, onSaveCancel, onSaveError);
+			#end
 		}
 	}
 
-	function onSaveComplete(_):Void
+	function onSaveComplete():Void
 	{
-		_file.removeEventListener(#if desktop Event.SELECT #else Event.COMPLETE #end, onSaveComplete);
-		_file.removeEventListener(Event.CANCEL, onSaveCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-		_file = null;
+		unsavedProgress = false;
 		FlxG.log.notice("Successfully saved file.");
 	}
 
 	/**
 		* Called when the save file dialog is cancelled.
 		*/
-	function onSaveCancel(_):Void
+	function onSaveCancel():Void
 	{
-		_file.removeEventListener(#if desktop Event.SELECT #else Event.COMPLETE #end, onSaveComplete);
-		_file.removeEventListener(Event.CANCEL, onSaveCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-		_file = null;
 	}
 
 	/**
 		* Called if there is an error while saving the gameplay recording.
 		*/
-	function onSaveError(_):Void
+	function onSaveError():Void
 	{
-		_file.removeEventListener(#if desktop Event.SELECT #else Event.COMPLETE #end, onSaveComplete);
-		_file.removeEventListener(Event.CANCEL, onSaveCancel);
-		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
-		_file = null;
 		FlxG.log.error("Problem saving file");
 	}
 }

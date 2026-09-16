@@ -156,6 +156,7 @@ class MainMenuState extends MusicBeatState
 
 		if (!selectedSomethin)
 		{
+			var mouseConfirmClick:Bool = false;
 			if (controls.UI_UP_P)
 				changeItem(-1);
 
@@ -183,6 +184,7 @@ class MainMenuState extends MusicBeatState
 				if(leftItem != null && FlxG.mouse.overlaps(leftItem))
 				{
 					allowMouse = true;
+					mouseConfirmClick = selectedItem == leftItem;
 					if(selectedItem != leftItem)
 					{
 						curColumn = LEFT;
@@ -192,6 +194,7 @@ class MainMenuState extends MusicBeatState
 				else if(rightItem != null && FlxG.mouse.overlaps(rightItem))
 				{
 					allowMouse = true;
+					mouseConfirmClick = selectedItem == rightItem;
 					if(selectedItem != rightItem)
 					{
 						curColumn = RIGHT;
@@ -222,6 +225,10 @@ class MainMenuState extends MusicBeatState
 						curColumn = CENTER;
 						curSelected = distItem;
 						changeItem();
+					}
+					else if(distItem != -1)
+					{
+						mouseConfirmClick = true;
 					}
 				}
 			}
@@ -268,7 +275,7 @@ class MainMenuState extends MusicBeatState
 				MusicBeatState.switchState(new TitleState());
 			}
 
-			if (controls.ACCEPT || (FlxG.mouse.justPressed && allowMouse))
+			if (controls.ACCEPT || (FlxG.mouse.justPressed && allowMouse && mouseConfirmClick))
 			{
 				FlxG.sound.play(Paths.sound('confirmMenu'));
 				selectedSomethin = true;

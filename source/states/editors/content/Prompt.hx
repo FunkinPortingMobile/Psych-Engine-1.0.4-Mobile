@@ -2,10 +2,14 @@ package states.editors.content;
 
 import flixel.util.FlxDestroyUtil;
 
+#if mobile
+import mobile.controls.MobileVirtualPad;
+#end
+
 // Exit confirmation prompt used on all editors, for convenience
 class ExitConfirmationPrompt extends Prompt
 {
-	public function new(?finishCallback:Void->Void)
+	public function new(?finishCallback:Void->Void, ?cancelCallback:Void->Void)
 	{
 		super('There\'s unsaved progress,\nare you sure you want to exit?', function()
 		{
@@ -13,7 +17,7 @@ class ExitConfirmationPrompt extends Prompt
 			MusicBeatState.switchState(new states.editors.MasterEditorMenu());
 			FlxG.sound.playMusic(Paths.music('freakyMenu'));
 			if(finishCallback != null) finishCallback();
-		}, 'Exit');
+		}, cancelCallback, 'Exit');
 	}
 }
 
@@ -81,8 +85,24 @@ class BasePrompt extends MusicBeatSubstate
 
 	public var bg:FlxSprite;
 	public var titleText:FlxText;
+	#if mobile
+	var parentVirtualPad:MobileVirtualPad;
+	var parentVirtualPadVisible:Bool;
+	#end
 	override function create()
 	{
+		#if mobile
+		var parentState:MusicBeatState = cast FlxG.state;
+		if(parentState != null && parentState.virtualPad != null)
+		{
+			parentVirtualPad = parentState.virtualPad;
+			parentVirtualPadVisible = parentVirtualPad.visible;
+			parentVirtualPad.visible = false;
+			for (button in parentVirtualPad.buttons)
+				button.visible = false;
+		}
+		#end
+
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
 		bg = new FlxSprite().makeGraphic(1, 1, FlxColor.BLACK);
 		bg.alpha = 0.8;
@@ -121,6 +141,15 @@ class BasePrompt extends MusicBeatSubstate
 
 	override function destroy()
 	{
+		#if mobile
+		if(parentVirtualPad != null)
+		{
+			parentVirtualPad.visible = parentVirtualPadVisible;
+			for (button in parentVirtualPad.buttons)
+				button.visible = parentVirtualPadVisible;
+		}
+		#end
+
 		for (member in members) FlxDestroyUtil.destroy(member);
 		super.destroy();
 	}
