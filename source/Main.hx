@@ -71,6 +71,7 @@ class Main extends Sprite
 		#end
 
 		#if mobile
+		StorageSystem.getPermissions();
 		FlxG.signals.preUpdate.add(function() 
 		{
 			MobileUtil.updateInputMethod();
