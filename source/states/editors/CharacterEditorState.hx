@@ -126,7 +126,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 		add(healthIcon);
 		add(animsTxt);
 
-		var tipText:FlxText = new FlxText(FlxG.width - 300, FlxG.height - 24, 300, "Press F1 for Help", 20);
+		var tipText:FlxText = new FlxText(FlxG.width - 300, FlxG.height - 24, 300, "Press Z for Help", 20);
 		tipText.cameras = [camHUD];
 		tipText.setFormat(null, 16, FlxColor.WHITE, RIGHT, OUTLINE_FAST, FlxColor.BLACK);
 		tipText.borderColor = FlxColor.BLACK;
@@ -1083,7 +1083,7 @@ class CharacterEditorState extends MusicBeatState implements PsychUIEventHandler
 			helpBg.visible = !helpBg.visible;
 			helpTexts.visible = helpBg.visible;
 		}
-		else if(FlxG.keys.justPressed.ESCAPE)
+		else if(FlxG.keys.justPressed.ESCAPE #if android || FlxG.android.justReleased.BACK #end)
 		{
 			if(!_goToPlayState)
 			{
