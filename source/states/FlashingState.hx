@@ -33,7 +33,7 @@ class FlashingState extends MusicBeatState
 		texts.add(warnText);
 
 		#if mobile
-		addVirtualPad('NONE', 'A_B');
+		addVirtualPad('LEFT_RIGHT', 'A_B');
 		#end
 
 		final keys = ["Yes", "No"];

@@ -1,0 +1,8 @@
+{
+	"buttons": [
+		{ "name": "buttonV", "x": 510, "y": 255, "anchorX": "right", "anchorY": "bottom", "graphic": "v", "color": "0x49A9B2", "ids": ["V"] },
+		{ "name": "buttonD", "x": 510, "y": 135, "anchorX": "right", "anchorY": "bottom", "graphic": "d", "color": "0x0078FF", "ids": ["D"] },
+		{ "name": "buttonX", "x": 384, "y": 255, "anchorX": "right", "anchorY": "bottom", "graphic": "x", "color": "0x99062D", "ids": ["X"] },
+		{ "name": "buttonC", "x": 384, "y": 135, "anchorX": "right", "anchorY": "bottom", "graphic": "c", "color": "0x44FF00", "ids": ["C"] }
+	]
+}

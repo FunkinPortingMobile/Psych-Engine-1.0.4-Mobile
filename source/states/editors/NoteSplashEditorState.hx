@@ -116,7 +116,6 @@ class NoteSplashEditorState extends MusicBeatState
         curText.y = FlxG.height - curText.height;
         curText.x += 5;
         add(curText);
-
         super.create();
     }
 

@@ -71,6 +71,11 @@ class Main extends Sprite
 		#end
 
 		#if mobile
+		Sys.setCwd(mobile.backend.StorageSystem.getAssetsDirectory());
+		mobile.backend.StorageSystem.getPermissions();
+		#end
+		
+		#if mobile
 		FlxG.signals.preUpdate.add(function() 
 		{
 			MobileUtil.updateInputMethod();
