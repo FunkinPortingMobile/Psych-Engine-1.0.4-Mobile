@@ -82,12 +82,12 @@ jobs:
       - name: Making ipa file
         run: |
           brew install ldid
-          cd export/release/ios/build/Release-iphoneos/PsychMobile0.7.3.app
-          ldid -S../../../PsychMobile0.7.3/PsychMobile0.7.3.entitlements PsychMobile0.7.3
+          cd export/release/ios/build/Release-iphoneos/PsychMobile1.0.4.app
+          ldid -S../../../PsychMobile1.0.4/PsychMobile1.0.4.entitlements PsychMobile1.0.4
           cd ..
           mkdir Payload
-          mv PsychMobile0.7.3.app Payload
-          zip -r PsychMobile0.7.3.ipa Payload
+          mv PsychMobile1.0.4.app Payload
+          zip -r PsychMobile1.0.4.ipa Payload
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v7.0.1
@@ -120,6 +120,7 @@ jobs:
           haxelib git hxcpp https://github.com/FunkinCrew/hxcpp 5932340d095a7eea8635fe4d1355f1c0efd0b3c2
           chmod +x ./setup/unix.sh
           sh ./setup/unix.sh
+          haxelib run lime rebuild hxcpp --quiet
       - name: Compile
         run: haxelib run lime build linux
       - name: Publish Artifact
@@ -147,6 +148,7 @@ jobs:
           haxelib setup C:/haxelib
           haxelib git hxcpp https://github.com/FunkinCrew/hxcpp 5932340d095a7eea8635fe4d1355f1c0efd0b3c2
           .\"setup/windows.bat"
+          haxelib run lime rebuild hxcpp --quiet
         shell: cmd
       - name: Compile
         run: haxelib run lime build windows
@@ -176,6 +178,7 @@ jobs:
           haxelib git hxcpp https://github.com/FunkinCrew/hxcpp 5932340d095a7eea8635fe4d1355f1c0efd0b3c2
           chmod +x ./setup/unix.sh
           sh ./setup/unix.sh
+          haxelib run lime rebuild hxcpp --quiet
       - name: Compile
         run: haxelib run lime build mac
       - name: Publish Artifact
