@@ -32,6 +32,10 @@ class ApplicationMain
 		setupMetadata(app);
 		setupWindows(app, config);
 		setupPreloader(app);
+		
+		#if mobile
+		Sys.setCwd(mobile.backend.StorageSystem.getAssetsDirectory());
+		#end
 
 		app.preloader.onComplete.add(function() {
 			app.window.stage.addChild(new ::APP_MAIN::());

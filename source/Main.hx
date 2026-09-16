@@ -69,13 +69,9 @@ class Main extends Sprite
 		#if (cpp && windows)
 		backend.Native.fixScaling();
 		#end
-
-		#if mobile
-		Sys.setCwd(mobile.backend.StorageSystem.getAssetsDirectory());
-		mobile.backend.StorageSystem.getPermissions();
-		#end
 		
 		#if mobile
+		StorageSystem.getPermissions();
 		FlxG.signals.preUpdate.add(function() 
 		{
 			MobileUtil.updateInputMethod();
@@ -176,7 +172,7 @@ class Main extends Sprite
 		#end
 
 		FlxG.fixedTimestep = false;
-		FlxG.game.focusLostFramerate = 60;
+		FlxG.game.focusLostFramerate = #if mobile 30 #else 60 #end;
 		FlxG.keys.preventDefaultKeys = [TAB];
 
 		#if android
