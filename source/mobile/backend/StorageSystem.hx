@@ -7,6 +7,7 @@ import haxe.io.Bytes;
 
 import openfl.utils.ByteArray;
 import openfl.utils.Assets;
+import lime.utils.Assets as LimeAssets;
 
 #if android
 import androidmanager.os.Environment;
@@ -24,7 +25,7 @@ import sys.io.File;
 using StringTools;
 
 /** * @Authors StarNova (Cream.BR), LumiCoder (FNF BR)
- * @version 0.2.0
+ * @version 0.2.1
  */
 class StorageSystem
 {
@@ -182,6 +183,8 @@ class StorageSystem
 	public static function copyFromAPK(sourceDir:String, ?targetDir:String = null, ?forceOverwrite:Bool = true, ?baseDirectory:String):Int
 	{
 		var copiedCount = 0;
+
+		var ignoredFolders:Array<String> = ["fonts/"];
 		
 		#if mobile
 		if (!StringTools.endsWith(sourceDir, "/")) sourceDir += "/";
@@ -201,7 +204,20 @@ class StorageSystem
 				if (StringTools.startsWith(assetPath, sourceDir))
 				{
 					var relativePath = assetPath.substring(sourceDir.length);
-					if (relativePath == "" || relativePath == null) continue;
+                    var shouldIgnore:Bool = false;
+                    for (folder in ignoredFolders)
+                    {
+                        if (relativePath.indexOf(folder) != -1)
+                        {
+                            shouldIgnore = true;
+                            break;
+                        }
+                    }
+                    
+                    if (shouldIgnore || StringTools.endsWith(assetPath.toLowerCase(), ".ttf") || StringTools.endsWith(assetPath.toLowerCase(), ".otf"))
+                    {
+                        continue;
+                    }
 					
 					if (StringTools.startsWith(relativePath, "embeds/")) relativePath = relativePath.substring(7);
 					else if (StringTools.startsWith(relativePath, "game/")) relativePath = relativePath.substring(5);
@@ -216,18 +232,44 @@ class StorageSystem
 						if (FileSystem.exists(fullTargetPath) && !forceOverwrite) continue;
 						
 						var fileBytes:Bytes = null;
-						
-						try { 
-							var b:ByteArray = Assets.getBytes(assetPath);
-							if (b != null) fileBytes = Bytes.ofData(b);
-						} catch (e:Dynamic) {}
-						
-						if (fileBytes == null)
-						{
-							try {
-								fileBytes = lime.utils.Assets.getBytes(assetPath);
-							} catch(e:Dynamic) {}
+                        
+                        try {
+                            var libName = "default";
+                            var symbol = assetPath;
+                            if (assetPath.indexOf(":") > -1) {
+                                libName = assetPath.split(":")[0];
+                                symbol = assetPath.split(":")[1];
+                            }
+                            
+                            var lib = LimeAssets.getLibrary(libName);
+                            if (lib != null) {
+                                fileBytes = lib.getBytes(symbol);
+                            }
+                        } catch (e:Dynamic) {
+							trace("Error getting bytes from the file: " + e);
 						}
+                        
+                        if (fileBytes == null)
+                        {
+                            var isFont = StringTools.endsWith(assetPath.toLowerCase(), ".ttf") || StringTools.endsWith(assetPath.toLowerCase(), ".otf");
+                            
+                            if (!isFont) {
+                                try {
+                                    var b:ByteArray = Assets.getBytes(assetPath);
+                                    if (b != null) fileBytes = cast b;
+                                } catch(e:Dynamic) {
+									trace("Error getting bytes from the file: " + e);
+								}
+                                
+                                if (fileBytes == null) {
+                                    try {
+                                        fileBytes = LimeAssets.getBytes(assetPath);
+                                    } catch(e:Dynamic) {
+										trace("Error getting bytes from the file: " + e);
+									}
+                                }
+                            }
+                        }
 						
 						if (fileBytes != null)
 						{
