@@ -178,6 +178,8 @@ jobs:
           haxelib git hxcpp https://github.com/FunkinCrew/hxcpp 5932340d095a7eea8635fe4d1355f1c0efd0b3c2
           chmod +x ./setup/unix.sh
           sh ./setup/unix.sh
+          haxelib remove lime
+          haxelib git lime https://github.com/DeveloperPorting-Stuff/LimeFunkinCrew main --quiet
           haxelib run lime rebuild hxcpp --quiet
       - name: Compile
         run: haxelib run lime build mac
