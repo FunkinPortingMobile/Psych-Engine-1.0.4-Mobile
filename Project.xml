@@ -27,6 +27,7 @@
 	<define name="DISCORD_ALLOWED" unless="ios" />
 	<define name="TRANSLATIONS_ALLOWED" />
 	<define name="VIDEOS_ALLOWED" unless="32bits"/>
+	<define name="ASTC_SUPPORT" if="mobile" />
 	<define name="IRIS_DEBUG"/>
 	
 	<define name="MULTITHREADED_LOADING" /> <!-- UNCOMMENTING THIS LINE WILL ENABLE MULTITHREADED LOADING, WHICH IMPROVES LOADING TIMES, BUT APPARENTLY CAN FREEZE THE GAME ON SONG LOAD IN OLDER PCs? -->

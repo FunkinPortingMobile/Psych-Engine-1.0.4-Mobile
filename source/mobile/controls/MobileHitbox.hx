@@ -61,7 +61,6 @@ class MobileHitbox extends TouchInputManager
 			if (btn != null)
 			{
 				FlxTween.cancelTweensOf(btn); 
-				
 				remove(btn);
 				FlxDestroyUtil.destroy(btn);
 			}

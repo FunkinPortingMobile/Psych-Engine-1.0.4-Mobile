@@ -12,6 +12,9 @@ import openfl.utils.AssetType;
 import openfl.utils.Assets as OpenFlAssets;
 import openfl.system.System;
 import openfl.geom.Rectangle;
+#if ASTC_SUPPORT
+import backend.astcsupport.openfl.display.ASTCBitmapData;
+#end
 
 import lime.utils.Assets;
 import flash.media.Sound;
@@ -228,26 +231,86 @@ class Paths
 	public static var currentTrackedAssets:Map<String, FlxGraphic> = [];
 	static public function image(key:String, ?parentFolder:String = null, ?allowGPU:Bool = true):FlxGraphic
 	{
-		key = Language.getFileTranslation('images/$key') + '.png';
-		var bitmap:BitmapData = null;
-		if (currentTrackedAssets.exists(key))
+		var baseKey:String = Language.getFileTranslation('images/$key');
+		var keyPng:String = baseKey + '.png';
+
+		#if ASTC_SUPPORT
+		var keyAstc:String = baseKey + '.astc';
+		if (currentTrackedAssets.exists(keyAstc))
 		{
-			localTrackedAssets.push(key);
-			return currentTrackedAssets.get(key);
+			localTrackedAssets.push(keyAstc);
+			return currentTrackedAssets.get(keyAstc);
 		}
-		return cacheBitmap(key, parentFolder, bitmap, allowGPU);
+		#end
+
+		if (currentTrackedAssets.exists(keyPng))
+		{
+			localTrackedAssets.push(keyPng);
+			return currentTrackedAssets.get(keyPng);
+		}
+
+		#if ASTC_SUPPORT
+		var filePng:String = getPath(keyPng, IMAGE, parentFolder, true);
+		var fileAstc:String = getPath(keyAstc, IMAGE, parentFolder, true);
+		
+		var astcExists:Bool = false;
+		#if (MODS_ALLOWED && sys)
+		if (FileSystem.exists(fileAstc)) astcExists = true;
+		else
+		#end
+		if (OpenFlAssets.exists(fileAstc)) astcExists = true;
+
+		if (astcExists)
+		{
+			return cacheBitmap(keyAstc, parentFolder, null, allowGPU);
+		}
+		#end
+
+		return cacheBitmap(keyPng, parentFolder, null, allowGPU);
 	}
 
 	public static function cacheBitmap(key:String, ?parentFolder:String = null, ?bitmap:BitmapData, ?allowGPU:Bool = true):FlxGraphic
 	{
+		var isAstc:Bool = false;
+		#if ASTC_SUPPORT
+		isAstc = StringTools.endsWith(key, '.astc');
+		#end
+
 		if (bitmap == null)
 		{
 			var file:String = getPath(key, IMAGE, parentFolder, true);
-			#if MODS_ALLOWED
+			
+			#if ASTC_SUPPORT
+			if (isAstc && !StringTools.endsWith(file, '.astc')) 
+			{
+				file = StringTools.replace(getPath(StringTools.replace(key, '.astc', '.png'), IMAGE, parentFolder, true), '.png', '.astc');
+			}
+			#end
+
+			#if (MODS_ALLOWED && sys)
 			if (FileSystem.exists(file))
+			{
+				#if ASTC_SUPPORT
+				if (isAstc) bitmap = ASTCBitmapData.fromBytes(File.getBytes(file));
+				else
+				#end
 				bitmap = BitmapData.fromFile(file);
-			else #end if (OpenFlAssets.exists(file, IMAGE))
-				bitmap = OpenFlAssets.getBitmapData(file);
+			}
+			else 
+			#end 
+			{
+				#if ASTC_SUPPORT
+				if (isAstc)
+				{
+					if (OpenFlAssets.exists(file)) bitmap = ASTCBitmapData.fromBytes(OpenFlAssets.getBytes(file));
+				}
+				else
+				#end
+				if (OpenFlAssets.exists(file, IMAGE))
+				{
+					bitmap = OpenFlAssets.getBitmapData(file);
+				}
+			}
 
 			if (bitmap == null)
 			{
@@ -256,7 +319,7 @@ class Paths
 			}
 		}
 
-		if (allowGPU && ClientPrefs.data.cacheOnGPU && bitmap.image != null)
+		if (allowGPU && ClientPrefs.data.cacheOnGPU && bitmap.image != null && !isAstc)
 		{
 			bitmap.lock();
 			if (bitmap.__texture == null)

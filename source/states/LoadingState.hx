@@ -650,7 +650,7 @@ class LoadingState extends MusicBeatState
 
 			//trace('attempting on $prefix: $myKey');
 			var doTrace:Bool = false;
-			if(member.endsWith('/') || (!Paths.fileExists(myKey, type, false, parentFolder) && (doTrace = true)))
+			if(member.endsWith('/') || (!Paths.fileExists(myKey, type, false, parentFolder) #if ASTC_SUPPORT || !Paths.fileExists(myKey.replace('.png', '.astc'), type, false, parentFolder) #end) && (doTrace = true))
 			{
 				arr.remove(member);
 				if(doTrace) trace('Removed invalid $prefix: $member');

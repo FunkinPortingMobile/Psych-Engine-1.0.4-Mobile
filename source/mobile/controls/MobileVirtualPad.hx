@@ -78,14 +78,10 @@ class MobileVirtualPad extends TouchInputManager
 		var modsPath:String = Paths.modFolders('mobile/data/$folder/$layoutName.json');
 		if (FileSystem.exists(modsPath)) {
 			content = File.getContent(modsPath);
-		} else if (FileSystem.exists(path)) {
-			content = File.getContent(path);
 		}
-		#else
-		if (Assets.exists(path)) {
+		else #end if (Assets.exists(path)) {
 			content = Assets.getText(path);
 		}
-		#end
 
 		if (content != null)
 		{
