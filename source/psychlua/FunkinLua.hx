@@ -1536,12 +1536,12 @@ class FunkinLua {
 			#if MODS_ALLOWED
 			if(modName == null)
 			{
-				if(this.modFolder == null)
+				if(Mods.currentModDirectory == null)
 				{
 					FunkinLua.luaTrace('getModSetting: Argument #2 is null and script is not inside a packed Mod folder!', false, false, FlxColor.RED);
 					return null;
 				}
-				modName = this.modFolder;
+				modName = Mods.currentModDirectory;
 			}
 			return LuaUtils.getModSetting(saveTag, modName);
 			#else
