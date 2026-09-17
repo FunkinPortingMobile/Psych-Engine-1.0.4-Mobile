@@ -197,7 +197,7 @@ class Mods
 				}
 			}
 		} catch(e) {
-			trace(e);
+			trace('Error Reading modlist.txt $e');
 		}
 		
 		// Scan for folders that aren't on modsList.txt yet
