@@ -175,6 +175,8 @@ class Main extends Sprite
 		FlxG.game.focusLostFramerate = #if mobile 30 #else 60 #end;
 		FlxG.keys.preventDefaultKeys = [TAB];
 
+		Application.current.window.setVSync(false);
+
 		#if android
 		FlxG.android.preventDefaultKeys = [BACK];
 		#end
