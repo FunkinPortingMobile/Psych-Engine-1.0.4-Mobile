@@ -163,17 +163,17 @@ class NoteOffsetState extends MusicBeatState
 		controllerPointer.alpha = 0.6;
 		controllerPointer.cameras = [camHUD];
 		add(controllerPointer);
+
+		#if mobile
+		addVirtualPad('LEFT_RIGHT', 'A_B_C');
+		addVirtualPadCamera();
+		#end
 		
 		updateMode();
 		_lastControllerMode = true;
 
 		Conductor.bpm = 128.0;
 		FlxG.sound.playMusic(Paths.music('offsetSong'), 1, true);
-
-		#if mobile
-		addVirtualPad('LEFT_RIGHT', 'A_B_C');
-		addVirtualPadCamera();
-		#end
 
 		super.create();
 	}
@@ -527,6 +527,8 @@ class NoteOffsetState extends MusicBeatState
 		timeBar.visible = !onComboMenu;
 		timeTxt.visible = !onComboMenu;
 		beatText.visible = !onComboMenu;
+
+		#if mobile virtualPad.getButton('buttonLeft').visible = virtualPad.getButton('buttonRight').visible = !onComboMenu; #end
 
 		controllerPointer.visible = false;
 		FlxG.mouse.visible = false;

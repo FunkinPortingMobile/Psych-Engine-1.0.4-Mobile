@@ -169,7 +169,7 @@ class NotesColorSubState extends MusicBeatSubstate
 		_lastControllerMode = controls.controllerMode;
 
 		#if mobile
-		addVirtualPad('UP_DOWN', 'A_B_C');
+		addVirtualPad('NONE', 'B');
 		#end
 	}
 
@@ -471,7 +471,7 @@ class NotesColorSubState extends MusicBeatSubstate
 				}
 			} 
 		}
-		else if(controls.RESET #if mobile || virtualPad.getButton('buttonC').justPressed #end && hexTypeNum < 0)
+		else if(controls.RESET && hexTypeNum < 0)
 		{
 			if(FlxG.keys.pressed.SHIFT || FlxG.gamepads.anyPressed(LEFT_SHOULDER))
 			{
